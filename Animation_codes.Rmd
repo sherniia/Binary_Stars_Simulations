@@ -1,0 +1,107 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+library(gridExtra)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(ggplot2)
+library(gganimate)
+library(gifski)
+library(scales)
+```
+
+```{r}
+#data1 <- read.csv('Stars_orbit_pos_sim2.csv')
+data1 <- Stars_orbit_pos_sim2
+```
+
+```{r}
+head(data1)
+```
+
+
+```{r}
+t <- data.frame(seq(1,500000))
+```
+
+```{r}
+data1 <- cbind(data1, t)
+```
+
+```{r}
+data1 <- data1 %>% rename(time = 'seq.1..5e.05.')
+head(data1)
+```
+```{r}
+orbits <- ggplot(data1) +
+  geom_point(aes(x=x_pos_1, y=y_pos_1), color='#DC143C') + 
+  geom_point(aes(x=x_pos_2, y=y_pos_2), color='orange') +
+  geom_point(aes(x=planet_x1, y=planet_y1), color='blue') +
+  geom_point(aes(x=planet_x2, y=planet_y2), color='purple') + ylab ('Y axis in AU') + xlab ('X axis in AU')
+orbits
+```
+  
+```{r}
+orbits <- ggplot(data1) +
+  geom_point(aes(x=x_pos_1, y=y_pos_1), color='red') + 
+  geom_point(aes(x=x_pos_2, y=y_pos_2), color='orange') +
+  geom_point(aes(x=planet_x1, y=planet_y1), color='#3CB371') +
+ # geom_point(aes(x=planet_x2, y=planet_y2), color='purple') +
+  xlab("X axis in AU") +
+  ylab("Y axis in AU") +
+  theme_minimal(base_size = 12, base_family = "Georgia") +
+  scale_color_brewer(name = "", palette = "Set2") +
+  theme(legend.position=c(0.8,0.4)) +
+  # gganimate code
+  ggtitle("{frame_time}") +
+  transition_time(time) +
+  ease_aes("linear") +
+  enter_fade() +
+  exit_fade()
+
+```
+
+```{r}
+orbits <- ggplot(data1) +
+  geom_point(aes(x=x_pos_1, y=y_pos_1), color='red') + 
+  geom_point(aes(x=x_pos_2, y=y_pos_2), color='orange') +
+  xlab("X axis in AU") +
+  ylab("Y axis in AU") +
+  theme_minimal(base_size = 12, base_family = "Georgia") +
+  scale_color_brewer(name = "", palette = "Set2") +
+  theme(legend.position=c(0.8,0.4)) +
+  # gganimate code
+  ggtitle("{frame_time}") +
+  transition_time(time) +
+  ease_aes("linear") +
+  enter_fade() +
+  exit_fade()
+
+```
+
+
+```{r}
+animate(orbits, duration = 20, fps = 25, width = 750, height = 450, renderer = gifski_renderer())
+anim_save("Sim2_noplanet.gif")
+system("convert orbits1.gif \\( +clone -set delay 300 \\) +swap +delete  orbits_with_pause.gif")
+```
+
+Thanks my dude https://rpubs.com/Mihiretu1/Kebede and thank you https://github.com/thomasp85/gganimate/issues/335 
+
+```{r}
+animate(orbits, renderer = ffmpeg_renderer(), width = 800, height = 450)
+anim_save("orbits.mp4")
+system("ffmpeg -i nations.mp4 -vf 'setpts=2*PTS' nations_slow.mp4")
+```
+
